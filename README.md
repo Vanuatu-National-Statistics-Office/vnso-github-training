@@ -20,7 +20,7 @@ This repository provides a "toy" example of such a case with a dummy sensitive d
 
 We will use the history of this repository to demonstrate:  
 
-- Even if a file has been previously removed locally and changes pushed to a repo, the file can be retrieved online by browsing the remote's history
+- Even if a file has been previously removed locally and changes pushed to a repo, the file can be retrieved online by browsing the remote's history.
 - A simple means to ensure files in certain local directories will not be accidentally uploaded to the repository (using `.gitignore`); as well as the limitations of doing that.
 - One method to remove such files _permanently_ and rewrite the repository's history to ensure it cannot be retrieved in the remote.
 
@@ -28,9 +28,9 @@ We will use the history of this repository to demonstrate:
 >Throughout this walkthrough, we use and illustrate Command Line Interface (CLI) commands to perform all local operations such as adding and removing files, committing to Git and pushing to Github. Note that most of these operations can also be done through various IDE interfaces (e.g. Windows File Explorer for file operations, and Git actions through e.g. the RStudio IDE interface). However, there are limits to the IDE option, and getting used to using the CLI for this purpose is recommended - for example the key `git filter-repo` command as described below is likely not implemented in any IDE.  
 In this walkthrough, wherever we present a code block that looks like this - 
 >```
-> git log
+> > git log
 >```
->We assume this to mean commands that are entered into a CLI prompt (`>`), ___in the root of the Git repository we are working on___. There are various options for this depending on your operating system, e.g. [bash](https://www.freecodecamp.org/news/linux-command-line-bash-tutorial/) on Linux, [Terminal](https://support.apple.com/en-gb/guide/terminal/welcome/mac) in MacOS, and [git-bash](https://www.atlassian.com/git/tutorials/git-bash) on Windows. Note that RStudio has a built-in terminal interface which you can use in place of this for convenience.  
+>We assume this to mean commands (here `git log`) that are entered into a CLI prompt (`>`), ___in the root of the Git repository we are working on___. There are various options for this depending on your operating system, e.g. [bash](https://www.freecodecamp.org/news/linux-command-line-bash-tutorial/) on Linux, [Terminal](https://support.apple.com/en-gb/guide/terminal/welcome/mac) in MacOS, and [git-bash](https://www.atlassian.com/git/tutorials/git-bash) on Windows. Note that many IDE's such as RStudio and VSCode have a built-in terminal interface which you can use in place of this for convenience.  
 A publicly available introduction to CLI (third party) can be found [here](https://blog.testproject.io/2021/03/30/a-beginners-guide-to-command-line-interface-cli/) and [here](https://www.atlassian.com/git/tutorials/git-bash). 
 
 ## Finding sensitive data file, removing locally, and pushing <a id="removeandpush"></a>
@@ -119,12 +119,17 @@ __It is also important to stress that if this addition is made to the `.gitignor
 To permanently erase a file from a repository, so it is no longer present in the history, we need to essentially re-write the repository history. In effect, we need to go through each commit and "rebuild" the repository to remove all evidence of the file.  
 There are several ways to do this and we cannot go into all of them - for reference the [Git/Github documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) gives a lot more detail. 
 
+> ### Warning
+> It is worth stressing that the retention of a repository history, and therefore a record of every file that was added, changed or deleted, is a key reason for the existence and use of Git (and Github as a collaboration tool) in the first place. Thus, permanently removing files as described here is not just difficult but goes against a lot of the philosophy of Git.  
+>
+>**Please be aware that the actions described here are (by definition) permanently destructive and may not be easily undone - please use your own judgement, particularly before pushing changes to a remote repository. Before performing them, it may be advisable to make a local "hard" backup of files in your local repository.**
+
 The method we use here is the `git filter-repo` command. This essentially iteratively rebuilds the repo history to remove everything relating to the given file.  
 Note that this assumes that the actual file has already been removed locally from the repository (if you want to keep it, you may have to temporarily remove it and add it back in after you've run `git filter-repo` and added the folder to the `.gitignore` file as above):
 ```
 > rm data/secure/personal_data.csv
 ```
-The `git filter-repo` command assumes you are working on a "fresh clone" of the respository - this is presumably to avoid any issues with unsaved changes and/or avoid critial merge conflicts with others that may be working with the same remote repository. In the command below this is bypassed by the addition of the `--force` argument, but note that a real life condition you might want to avoid using this.
+The `git filter-repo` command assumes you are working on a "fresh clone" of the respository - this is presumably to avoid any issues with unsaved changes and/or avoid critial merge conflicts with others that may be working with the same remote repository. In the command below this is bypassed by the addition of the `--force` argument, but note that in a real life situation you might want to avoid using this option, and work with a fresh clone as suggested.
 
 ```
 > git filter-repo --force --invert-paths --path data/secure/personal_data.csv
@@ -206,7 +211,7 @@ It should be noted that even once the steps above have been taken, it is possibl
 
 For this reason, as much as possible, it is advisable to work with anyone holding local clones or forks of the repository to ensure the sensitive data is also removed from their local clones. The easiest and most "belt and braces" approach to this would be to ___ask all collaborators to re-clone the repository___. This may mean that they will lose some previously uncommitted changes; to some extent this is inevitable. Another option is to "rebase" their local copy - more information on this can be found [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository#fully-removing-the-data-from-github). 
 
-More broadly speaking, it is important to stress that while the above approach deals with the immediate issue of sensitive data being potentially publicly available (given the caveat above), ___this should be seen as a damage limitation strategy only__. Any sensitive data having been committed to a public repository at any point should be considered a data breach, that should be dealt with by whatever relevant organisational procedures.
+> It is important to stress that while the above approach deals with the immediate issue of sensitive data being potentially publicly available (given the caveat above), __this should be seen as a damage limitation strategy only__. Any sensitive data having been committed to a public repository at any point should be considered a data breach, that should be dealt with by whatever relevant organisational procedures.
 
 ## Exercise <a id="exercise"></a>
 
